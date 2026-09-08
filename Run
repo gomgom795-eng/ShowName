@@ -1,0 +1,116 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local playerModel = workspace:WaitForChild("iuuskxpn5172")
+local humanoid = playerModel:WaitForChild("Humanoid")
+
+-- UI
+local gui = Instance.new("ScreenGui")
+gui.Name = "SpeedJumpUI"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.fromOffset(180, 125)
+frame.Position = UDim2.new(0.5, -90, 0.5, -60)
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+frame.BorderSizePixel = 0
+frame.Parent = gui
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 28)
+title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+title.Text = "Speed / Jump"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.TextSize = 14
+title.Parent = frame
+
+local function createBox(y, default)
+    local box = Instance.new("TextBox")
+    box.Size = UDim2.fromOffset(105, 28)
+    box.Position = UDim2.fromOffset(8, y)
+    box.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    box.BorderSizePixel = 0
+    box.Text = tostring(default)
+    box.TextColor3 = Color3.new(1, 1, 1)
+    box.PlaceholderText = "ใส่ค่า"
+    box.TextSize = 13
+    box.ClearTextOnFocus = false
+    box.Parent = frame
+    return box
+end
+
+local speedBox = createBox(36, humanoid.WalkSpeed)
+local jumpBox = createBox(72, humanoid.JumpHeight)
+
+local speedButton = Instance.new("TextButton")
+speedButton.Size = UDim2.fromOffset(55, 28)
+speedButton.Position = UDim2.fromOffset(118, 36)
+speedButton.Text = "Apply"
+speedButton.TextSize = 12
+speedButton.TextColor3 = Color3.new(1, 1, 1)
+speedButton.BackgroundColor3 = Color3.fromRGB(55, 100, 55)
+speedButton.BorderSizePixel = 0
+speedButton.Parent = frame
+
+local jumpButton = speedButton:Clone()
+jumpButton.Position = UDim2.fromOffset(118, 72)
+jumpButton.Text = "Apply"
+jumpButton.Parent = frame
+
+speedButton.MouseButton1Click:Connect(function()
+    local value = tonumber(speedBox.Text)
+
+    if value then
+        humanoid.WalkSpeed = value
+    end
+end)
+
+jumpButton.MouseButton1Click:Connect(function()
+    local value = tonumber(jumpBox.Text)
+
+    if value then
+        humanoid.JumpHeight = value
+    end
+end)
+
+-- ลาก UI
+local dragging = false
+local dragStart
+local startPos
+
+title.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+
+        dragging = true
+        dragStart = input.Position
+        startPos = frame.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if not dragging then
+        return
+    end
+
+    if input.UserInputType == Enum.UserInputType.MouseMovement
+        or input.UserInputType == Enum.UserInputType.Touch then
+
+        local delta = input.Position - dragStart
+
+        frame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
