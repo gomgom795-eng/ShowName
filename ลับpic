@@ -1,0 +1,145 @@
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+local enabled = false
+
+-- UI
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "GunAutoPickupUI"
+gui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.fromOffset(150, 60)
+frame.Position = UDim2.new(.5, -75, .2, 0)
+frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+frame.BorderSizePixel = 0
+
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,8)
+
+local drag = Instance.new("TextLabel", frame)
+drag.Size = UDim2.new(1,0,0,25)
+drag.BackgroundTransparency = 1
+drag.Text = "☰  Gun Pickup"
+drag.TextColor3 = Color3.fromRGB(200,200,200)
+drag.TextSize = 11
+drag.Font = Enum.Font.GothamBold
+drag.Active = true
+
+local button = Instance.new("TextButton", frame)
+button.Size = UDim2.new(1,-10,0,25)
+button.Position = UDim2.new(0,5,0,30)
+button.BackgroundColor3 = Color3.fromRGB(170,50,50)
+button.TextColor3 = Color3.new(1,1,1)
+button.Text = "Gun Pickup : OFF"
+button.TextSize = 14
+button.Font = Enum.Font.GothamBold
+button.BorderSizePixel = 0
+
+Instance.new("UICorner", button).CornerRadius = UDim.new(0,6)
+
+button.MouseButton1Click:Connect(function()
+	enabled = not enabled
+	button.Text = "Gun Pickup : "..(enabled and "ON" or "OFF")
+	button.BackgroundColor3 = enabled
+		and Color3.fromRGB(50,170,80)
+		or Color3.fromRGB(170,50,50)
+end)
+
+-- ลาก UI
+local dragging, start, pos = false
+
+drag.InputBegan:Connect(function(i)
+	if i.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging, start, pos = true, i.Position, frame.Position
+	end
+end)
+
+UIS.InputChanged:Connect(function(i)
+	if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+		local d = i.Position - start
+		frame.Position = UDim2.new(
+			pos.X.Scale, pos.X.Offset + d.X,
+			pos.Y.Scale, pos.Y.Offset + d.Y
+		)
+	end
+end)
+
+UIS.InputEnded:Connect(function(i)
+	if i.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = false
+	end
+end)
+
+-- หา Part
+local function getPart()
+	local h = workspace:FindFirstChild("GunPickupHolder")
+	local g = h and h:FindFirstChild("GunPickup")
+	return g and g:FindFirstChild("Part")
+end
+
+local function hasGun()
+	local b,c = player:FindFirstChild("Backpack"),player.Character
+	return (b and b:FindFirstChild("Gun")) or (c and c:FindFirstChild("Gun"))
+end
+
+-- แจ้งเตือน + เสียง
+local function notify()
+	local gui = player.PlayerGui
+
+	local msg = Instance.new("TextLabel")
+	msg.Size = UDim2.fromOffset(220, 45)
+	msg.Position = UDim2.new(.5, -110, .15, 0)
+	msg.BackgroundColor3 = Color3.fromRGB(30,30,30)
+	msg.BackgroundTransparency = .1
+	msg.Text = "🔫  เก็บปืนแล้ว!"
+	msg.TextColor3 = Color3.new(1,1,1)
+	msg.TextSize = 18
+	msg.Font = Enum.Font.GothamBold
+	msg.Parent = gui
+
+	Instance.new("UICorner", msg).CornerRadius = UDim.new(0,8)
+
+	local sound = Instance.new("Sound")
+	sound.SoundId = "rbxassetid://6026984224"
+	sound.Volume = 1
+	sound.Parent = gui
+	sound:Play()
+
+	task.delay(1.5, function()
+		msg:Destroy()
+		sound:Destroy()
+	end)
+end
+
+-- Auto Pickup
+--V2 /////////////////////
+task.spawn(function()
+	while task.wait(.03) do
+		if enabled and not hasGun() then
+			local c = player.Character
+			local root = c and c:FindFirstChild("HumanoidRootPart")
+			local part = getPart()
+
+			if root and part and part:IsA("BasePart") then
+				local old = root.CFrame
+				root.CFrame = part.CFrame
+
+				local t = os.clock()
+
+				repeat
+					task.wait(.02)
+				until hasGun()
+					or not part.Parent
+					or os.clock() - t >= 3
+
+				if hasGun() then
+					notify()
+				end
+
+				if root.Parent then
+					root.CFrame = old
+				end
+			end
+		end
+	end
+end)
