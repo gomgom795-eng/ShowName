@@ -11,11 +11,12 @@ local Scripts = {
     ["ฆ่าตกรลับESP"] = "https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/ลับEs",
     ["ฆ่าตกรลับ Pick"] = "https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/ลับpic",
     ["ล่องหน"] = "https://pastefy.app/4g8JRtP2/raw",
-    ["Kilck"] = "https://raw.githubusercontent.com/RovlixTinProject/NeverX/refs/heads/main/mfr.lua",
+    ["Kick"] = "https://raw.githubusercontent.com/RovlixTinProject/NeverX/refs/heads/main/mfr.lua",
     ["Day"] = "https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/setDay",
     ["Dex"] = "https://raw.githubusercontent.com/infyiff/backup/main/dex.lua",
     ["Spy"] = "https://raw.githubusercontent.com/78n/SimpleSpy/main/SimpleSpyBeta.lua",
-    ["RUN"] = "https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/Run"
+    ["RUN"] = "https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/Run",
+    ["TPP"] = "https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/TPP"
 }
 
 --// UI
@@ -38,6 +39,16 @@ Title.Text = "Script Hub"
 Title.TextColor3 = Color3.new(1, 1, 1)
 Title.TextSize = 16
 Title.Parent = Main
+
+--// ปุ่มย่อ
+local Minimize = Instance.new("TextButton")
+Minimize.Size = UDim2.fromOffset(25, 25)
+Minimize.Position = UDim2.new(1, -60, 0, 5)
+Minimize.BackgroundTransparency = 1
+Minimize.Text = "—"
+Minimize.TextColor3 = Color3.new(1, 1, 1)
+Minimize.TextSize = 18
+Minimize.Parent = Main
 
 --// ปุ่มปิด UI
 local Close = Instance.new("TextButton")
@@ -75,6 +86,23 @@ Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         0,
         Layout.AbsoluteContentSize.Y + 5
     )
+end)
+
+--// ระบบย่อ / ขยาย
+local minimized = false
+
+Minimize.MouseButton1Click:Connect(function()
+    minimized = not minimized
+
+    if minimized then
+        Container.Visible = false
+        Main.Size = UDim2.fromOffset(220, 35)
+        Minimize.Text = "+"
+    else
+        Container.Visible = true
+        Main.Size = UDim2.fromOffset(220, 310)
+        Minimize.Text = "—"
+    end
 end)
 
 --// สถานะ
