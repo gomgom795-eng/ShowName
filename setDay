@@ -1,0 +1,122 @@
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
+
+local player = Players.LocalPlayer
+local enabled = false
+
+-- UI
+local gui = Instance.new("ScreenGui")
+gui.Name = "MorningLightUI"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.fromOffset(145, 55)
+frame.Position = UDim2.new(0.5, -72, 0.2, 0)
+frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+frame.BorderSizePixel = 0
+frame.Parent = gui
+
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,7)
+
+local drag = Instance.new("TextLabel")
+drag.Size = UDim2.new(1,0,0,22)
+drag.BackgroundTransparency = 1
+drag.Text = "☀ Morning"
+drag.TextColor3 = Color3.fromRGB(220,220,220)
+drag.TextSize = 11
+drag.Font = Enum.Font.GothamBold
+drag.Active = true
+drag.Parent = frame
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(1,-10,0,25)
+button.Position = UDim2.fromOffset(5,25)
+button.BackgroundColor3 = Color3.fromRGB(170,50,50)
+button.Text = "Morning : OFF"
+button.TextColor3 = Color3.new(1,1,1)
+button.TextSize = 13
+button.Font = Enum.Font.GothamBold
+button.BorderSizePixel = 0
+button.Parent = frame
+
+Instance.new("UICorner", button).CornerRadius = UDim.new(0,5)
+
+-- จำค่า Lighting เดิม
+local old = {
+	ClockTime = Lighting.ClockTime,
+	Brightness = Lighting.Brightness,
+	ExposureCompensation = Lighting.ExposureCompensation,
+	Ambient = Lighting.Ambient,
+	OutdoorAmbient = Lighting.OutdoorAmbient,
+	GlobalShadows = Lighting.GlobalShadows
+}
+
+local function setMorning()
+	for _, obj in ipairs(Lighting:GetChildren()) do
+		obj:Destroy()
+	end
+	
+	Lighting.ClockTime = 8
+	Lighting.Brightness = 3
+	Lighting.ExposureCompensation = 0.5
+	Lighting.Ambient = Color3.fromRGB(200,200,200)
+	Lighting.OutdoorAmbient = Color3.fromRGB(200,200,200)
+	Lighting.GlobalShadows = true
+end
+
+local function restore()
+	Lighting.ClockTime = old.ClockTime
+	Lighting.Brightness = old.Brightness
+	Lighting.ExposureCompensation = old.ExposureCompensation
+	Lighting.Ambient = old.Ambient
+	Lighting.OutdoorAmbient = old.OutdoorAmbient
+	Lighting.GlobalShadows = old.GlobalShadows
+end
+
+button.MouseButton1Click:Connect(function()
+	enabled = not enabled
+
+	if enabled then
+		setMorning()
+		button.Text = "Morning : ON"
+		button.BackgroundColor3 = Color3.fromRGB(50,170,80)
+	else
+		restore()
+		button.Text = "Morning : OFF"
+		button.BackgroundColor3 = Color3.fromRGB(170,50,50)
+	end
+end)
+
+-- ลาก UI
+local dragging = false
+local startPos
+local framePos
+
+drag.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		startPos = input.Position
+		framePos = frame.Position
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - startPos
+
+		frame.Position = UDim2.new(
+			framePos.X.Scale,
+			framePos.X.Offset + delta.X,
+			framePos.Y.Scale,
+			framePos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+UIS.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = false
+	end
+end)
