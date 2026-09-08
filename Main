@@ -14,7 +14,8 @@ local Scripts = {
     ["Kilck"] = "https://raw.githubusercontent.com/RovlixTinProject/NeverX/refs/heads/main/mfr.lua",
     ["Day"] = "https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/setDay",
     ["Dex"] = "https://raw.githubusercontent.com/infyiff/backup/main/dex.lua",
-    ["Spy"] = "https://raw.githubusercontent.com/78n/SimpleSpy/main/SimpleSpyBeta.lua"
+    ["Spy"] = "https://raw.githubusercontent.com/78n/SimpleSpy/main/SimpleSpyBeta.lua",
+    ["RUN"] = "https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/Run"
 }
 
 --// UI
