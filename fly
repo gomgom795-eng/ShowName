@@ -1,0 +1,119 @@
+-- LocalScript เท่านั้น
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local hrp = character:WaitForChild("HumanoidRootPart")
+
+local flying = false
+local speed = 50
+
+local bodyVelocity
+local bodyGyro
+local flyConnection
+local noclipConnection
+
+local function startFly()
+    flying = true
+    humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+
+    bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+    bodyVelocity.Velocity = Vector3.zero
+    bodyVelocity.Parent = hrp
+
+    bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.MaxTorque = Vector3.new(1e5, 1e5, 1e5)
+    bodyGyro.CFrame = hrp.CFrame
+    bodyGyro.Parent = hrp
+
+    flyConnection = RunService.RenderStepped:Connect(function()
+        local cam = workspace.CurrentCamera
+        local moveDir = Vector3.zero
+
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+            moveDir += cam.CFrame.LookVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+            moveDir -= cam.CFrame.LookVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+            moveDir -= cam.CFrame.RightVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+            moveDir += cam.CFrame.RightVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+            moveDir += Vector3.new(0, 1, 0)
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+            moveDir -= Vector3.new(0, 1, 0)
+        end
+
+        if moveDir.Magnitude > 0 then
+            moveDir = moveDir.Unit
+        end
+
+        bodyVelocity.Velocity = moveDir * speed
+        bodyGyro.CFrame = cam.CFrame
+    end)
+
+    -- เปิด NoClip (บินทะลุผนัง)
+    noclipConnection = RunService.Stepped:Connect(function()
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end)
+
+    print("✈️ Fly Mode: ON (NoClip Enabled)")
+end
+
+local function stopFly()
+    flying = false
+    humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+
+    if flyConnection then flyConnection:Disconnect() end
+    if noclipConnection then noclipConnection:Disconnect() end
+    if bodyVelocity then bodyVelocity:Destroy() end
+    if bodyGyro then bodyGyro:Destroy() end
+
+    -- เปิด Collision กลับ
+    for _, part in pairs(character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = true
+        end
+    end
+
+    print("🚶 Fly Mode: OFF (NoClip Disabled)")
+end
+
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+
+    if input.KeyCode == Enum.KeyCode.Y then
+        if flying then
+            stopFly()
+        else
+            startFly()
+        end
+    end
+end)
+
+-- รองรับการ Respawn
+player.CharacterAdded:Connect(function(newChar)
+    character = newChar
+    humanoid = character:WaitForChild("Humanoid")
+    hrp = character:WaitForChild("HumanoidRootPart")
+    
+    if flying then
+        stopFly()
+    end
+end)
+
+print("✅ Fly Script Loaded!")
+print("Press [T] to toggle Fly + NoClip")
