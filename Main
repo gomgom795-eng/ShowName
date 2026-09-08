@@ -1,3 +1,27 @@
+--dayEs
+https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/dayEs?token=GHSAT0AAAAAAEIK477G2U7FM5NEJ4TFJG3O2VAFHYA
+--fly
+https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/fly?token=GHSAT0AAAAAAEIK477H6VI5HH4M26XDFITU2VAFL2A
+--godname
+https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/showname?token=GHSAT0AAAAAAEIK477GWVEXC4LSBW23F65W2VAFNAQ
+--ฆ่าตกรลับES
+https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/ลับEs?token=GHSAT0AAAAAAEIK477GMFWAKMY73BS7FWQE2VAFN4A
+--ฆ่าตกรลับPPick
+https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/ลับpic?token=GHSAT0AAAAAAEIK477GI7T4Z5JELQ2BUVR42VAFOLQ
+--ล่อง
+https://pastefy.app/4g8JRtP2/raw
+--kilck
+https://raw.githubusercontent.com/RovlixTinProject/NeverX/refs/heads/main/mfr.lua
+--day
+https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/setDay
+
+
+
+
+
+
+
+
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 
@@ -11,7 +35,8 @@ local Scripts = {
     ["ฆ่าตกรลับESP"] = "https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/ลับEs",
     ["ฆ่าตกรลับ Pick"] = "https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/ลับpic",
     ["ล่องหน"] = "https://pastefy.app/4g8JRtP2/raw",
-    ["Kilck"] = "https://raw.githubusercontent.com/RovlixTinProject/NeverX/refs/heads/main/mfr.lua"
+    ["Kilck"] = "https://raw.githubusercontent.com/RovlixTinProject/NeverX/refs/heads/main/mfr.lua",
+    ["Day"] = "https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/setDay"
 }
 
 --// UI
