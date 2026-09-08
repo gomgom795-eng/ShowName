@@ -1,0 +1,115 @@
+local Players = game:GetService("Players")
+
+local CHECK_INTERVAL = 0.03
+local highlights = {}
+
+local function removeHighlight(player)
+	if highlights[player] then
+		highlights[player]:Destroy()
+		highlights[player] = nil
+	end
+end
+
+local function setHighlight(player, color)
+	local character = player.Character
+	if not character then return end
+
+	if highlights[player] then
+		highlights[player].OutlineColor = color
+		return
+	end
+
+	local highlight = Instance.new("Highlight")
+	highlight.Name = "PlayerItemHighlight"
+	highlight.FillColor = color
+	highlight.FillTransparency = 1
+	highlight.OutlineColor = color
+	highlight.OutlineTransparency = 0
+	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+	highlight.Adornee = character
+	highlight.Parent = character
+
+	highlights[player] = highlight
+end
+
+local function checkPlayer(player)
+	local character = player.Character
+	local backpack = player:FindFirstChild("Backpack")
+
+	if not character or not backpack then
+		removeHighlight(player)
+		return
+	end
+
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+	if not humanoid or humanoid.Health <= 0 then
+		removeHighlight(player)
+		return
+	end
+
+	-- เช็ค Gun
+	local gun = backpack:FindFirstChild("Gun")
+
+	if not gun then
+		gun = character:FindFirstChild("Gun")
+	end
+
+	-- ถ้ามี Gun = สีฟ้า
+	if gun and gun:IsA("Tool") then
+		setHighlight(player, Color3.fromRGB(0, 170, 255))
+		return
+	end
+
+	-- เช็ค Monster
+	local monster = backpack:FindFirstChild("Monster")
+
+	if not monster then
+		monster = character:FindFirstChild("Monster")
+	end
+
+	-- ถ้ามี Monster = สีแดง
+	if monster and monster:IsA("Tool") then
+		setHighlight(player, Color3.fromRGB(255, 0, 0))
+		return
+	end
+
+	-- ไม่มีทั้งสองอย่าง
+	removeHighlight(player)
+end
+
+-- Loop ตรวจสอบ
+task.spawn(function()
+	while true do
+		for _, player in ipairs(Players:GetPlayers()) do
+			checkPlayer(player)
+		end
+
+		task.wait(CHECK_INTERVAL)
+	end
+end)
+
+-- ตั้งค่าผู้เล่น
+local function setupPlayer(player)
+	player.CharacterAdded:Connect(function(character)
+		removeHighlight(player)
+
+		local humanoid = character:WaitForChild("Humanoid")
+
+		humanoid.Died:Connect(function()
+			removeHighlight(player)
+		end)
+	end)
+end
+
+for _, player in ipairs(Players:GetPlayers()) do
+	setupPlayer(player)
+end
+
+Players.PlayerAdded:Connect(setupPlayer)
+
+-- ออกจากเซิร์ฟเวอร์
+Players.PlayerRemoving:Connect(function(player)
+	removeHighlight(player)
+	highlights[player] = nil
+end)
