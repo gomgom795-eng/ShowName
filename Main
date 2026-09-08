@@ -12,7 +12,9 @@ local Scripts = {
     ["ฆ่าตกรลับ Pick"] = "https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/ลับpic",
     ["ล่องหน"] = "https://pastefy.app/4g8JRtP2/raw",
     ["Kilck"] = "https://raw.githubusercontent.com/RovlixTinProject/NeverX/refs/heads/main/mfr.lua",
-    ["Day"] = "https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/setDay"
+    ["Day"] = "https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/setDay",
+    ["Dex"] = "https://raw.githubusercontent.com/infyiff/backup/main/dex.lua",
+    ["Spy"] = "https://raw.githubusercontent.com/78n/SimpleSpy/main/SimpleSpyBeta.lua"
 }
 
 --// UI
