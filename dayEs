@@ -1,0 +1,73 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local function removeHighlight(character)
+	if character then
+		local h = character:FindFirstChild("WeaponHighlight")
+		if h then h:Destroy() end
+	end
+end
+
+local function updatePlayer(p)
+	local character = p.Character
+	if not character then return end
+
+	local playerModel = workspace:FindFirstChild(p.Name)
+	local weapon = playerModel and playerModel:FindFirstChild("Weapon")
+
+	removeHighlight(character)
+
+	if weapon then
+		local highlight = Instance.new("Highlight")
+		highlight.Name = "WeaponHighlight"
+		highlight.FillTransparency = 1
+		highlight.OutlineTransparency = 0
+		highlight.OutlineColor = Color3.fromRGB(255, 0, 0)
+		highlight.Adornee = character
+		highlight.Parent = character
+	end
+end
+
+local function setupPlayer(p)
+	p.CharacterAdded:Connect(function(character)
+		removeHighlight(character)
+
+		task.wait(0.5)
+		updatePlayer(p)
+
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid.Died:Connect(function()
+				removeHighlight(character)
+			end)
+		end
+	end)
+
+	if p.Character then
+		updatePlayer(p)
+	end
+end
+
+for _, p in ipairs(Players:GetPlayers()) do
+	if p ~= player then
+		setupPlayer(p)
+	end
+end
+
+Players.PlayerAdded:Connect(setupPlayer)
+
+Players.PlayerRemoving:Connect(function(p)
+	if p.Character then
+		removeHighlight(p.Character)
+	end
+end)
+
+task.spawn(function()
+	while task.wait(0.2) do
+		for _, p in ipairs(Players:GetPlayers()) do
+			if p ~= player then
+				updatePlayer(p)
+			end
+		end
+	end
+end)
