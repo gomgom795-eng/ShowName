@@ -1,0 +1,181 @@
+local Players=game:GetService("Players")
+local UIS=game:GetService("UserInputService")
+local RunService=game:GetService("RunService")
+local Camera=workspace.CurrentCamera
+local LP=Players.LocalPlayer
+
+local GREEN=Color3.fromRGB(0,255,0)
+local YELLOW=Color3.fromRGB(255,255,0)
+local MAX=200
+
+local ESP,Tracers,Names={}, {}, {}
+local Locked,LockConn
+
+local function tracer(p)
+	local l=Drawing.new("Line")
+	l.Thickness=2
+	l.Color=GREEN
+	l.Visible=false
+	Tracers[p]=l
+end
+
+local function nameTag(p,c)
+	if Names[p] then Names[p]:Destroy() end
+	local h=c:FindFirstChild("Head")
+	if not h then return end
+
+	local b=Instance.new("BillboardGui")
+	b.Name="PlayerName"
+	b.Adornee=h
+	b.Size=UDim2.new(0,200,0,40)
+	b.StudsOffset=Vector3.new(0,2.5,0)
+	b.AlwaysOnTop=true
+
+	local t=Instance.new("TextLabel")
+	t.Size=UDim2.fromScale(1,1)
+	t.BackgroundTransparency=1
+	t.Text=p.Name
+	t.TextColor3=Color3.new(1,1,1)
+	t.TextStrokeTransparency=0
+	t.TextScaled=true
+	t.Font=Enum.Font.SourceSansBold
+	t.Parent=b
+
+	b.Parent=c
+	Names[p]=b
+end
+
+local function esp(p,c)
+	if p==LP then return end
+	if ESP[p] then ESP[p]:Destroy() end
+
+	local h=Instance.new("Highlight")
+	h.Adornee=c
+	h.FillTransparency=.7
+	h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
+
+	local col=p==Locked and YELLOW or GREEN
+	h.FillColor=col
+	h.OutlineColor=col
+	h.Parent=c
+
+	ESP[p]=h
+	if not Tracers[p] then tracer(p) end
+	nameTag(p,c)
+end
+
+local function setup(p)
+	if p==LP then return end
+	if p.Character then esp(p,p.Character) end
+
+	p.CharacterAdded:Connect(function(c)
+		task.wait(.1)
+		esp(p,c)
+	end)
+end
+
+local function closest()
+	local m=UIS:GetMouseLocation()
+	local target,dist=nil,MAX
+
+	for _,p in ipairs(Players:GetPlayers()) do
+		local c=p.Character
+		local h=c and c:FindFirstChild("Head")
+		local hum=c and c:FindFirstChildOfClass("Humanoid")
+
+		if p~=LP and h and hum and hum.Health>0 then
+			local pos,vis=Camera:WorldToViewportPoint(h.Position)
+			if vis then
+				local d=(Vector2.new(pos.X,pos.Y)-m).Magnitude
+				if d<dist then
+					target,dist=p,d
+				end
+			end
+		end
+	end
+
+	return target
+end
+
+local function unlock()
+	if LockConn then LockConn:Disconnect() LockConn=nil end
+	if Locked and ESP[Locked] then
+		ESP[Locked].FillColor=GREEN
+		ESP[Locked].OutlineColor=GREEN
+	end
+	Locked=nil
+end
+
+local function lock(p)
+	if not p then return end
+	unlock()
+	Locked=p
+
+	if ESP[p] then
+		ESP[p].FillColor=YELLOW
+		ESP[p].OutlineColor=YELLOW
+	end
+
+	LockConn=RunService.RenderStepped:Connect(function()
+		local c=p.Character
+		local h=c and c:FindFirstChild("Head")
+		local hum=c and c:FindFirstChildOfClass("Humanoid")
+
+		if not h or not hum or hum.Health<=0 then
+			local n=closest()
+			unlock()
+			if n then lock(n) end
+			return
+		end
+
+		Camera.CFrame=CFrame.lookAt(Camera.CFrame.Position,h.Position)
+	end)
+end
+
+for _,p in ipairs(Players:GetPlayers()) do setup(p) end
+Players.PlayerAdded:Connect(setup)
+
+Players.PlayerRemoving:Connect(function(p)
+	if p==Locked then unlock() end
+	if ESP[p] then ESP[p]:Destroy() end
+	if Tracers[p] then Tracers[p]:Remove() end
+	if Names[p] then Names[p]:Destroy() end
+	ESP[p]=nil
+	Tracers[p]=nil
+	Names[p]=nil
+end)
+
+RunService.RenderStepped:Connect(function()
+	local center=Vector2.new(Camera.ViewportSize.X/2,Camera.ViewportSize.Y)
+
+	for p,l in pairs(Tracers) do
+		local c=p.Character
+		local h=c and c:FindFirstChild("Head")
+		local hum=c and c:FindFirstChildOfClass("Humanoid")
+
+		if h and hum and hum.Health>0 then
+			local pos,vis=Camera:WorldToViewportPoint(h.Position)
+			l.Visible=vis
+			if vis then
+				l.Color=p==Locked and YELLOW or GREEN
+				l.From=center
+				l.To=Vector2.new(pos.X,pos.Y)
+			end
+		else
+			l.Visible=false
+		end
+	end
+end)
+
+UIS.InputBegan:Connect(function(i,gp)
+	if gp then return end
+	if i.KeyCode==Enum.KeyCode.Q then
+		if Locked then unlock() else lock(closest()) end
+	end
+	if i.KeyCode==Enum.KeyCode.LeftAlt then
+		if Locked then unlock() else lock(closest()) end
+	end
+	if i.KeyCode==Enum.KeyCode.V then
+		if Locked then unlock() else lock(closest()) end
+	end
+end)
