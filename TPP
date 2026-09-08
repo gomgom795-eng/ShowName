@@ -1,0 +1,129 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+
+-- UI
+local gui = Instance.new("ScreenGui")
+gui.Name = "TPPLockUI"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.fromOffset(175, 78)
+frame.Position = UDim2.new(0.5, -87, 0.5, -39)
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+frame.BorderSizePixel = 0
+frame.Parent = gui
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 28)
+title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+title.Text = "TPP Lock"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.TextSize = 14
+title.Parent = frame
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(1, -10, 0, 35)
+button.Position = UDim2.fromOffset(5, 34)
+button.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+button.BorderSizePixel = 0
+button.Text = "TPP : OFF"
+button.TextColor3 = Color3.new(1, 1, 1)
+button.TextSize = 13
+button.Parent = frame
+
+local enabled = false
+
+local function enableTPP()
+    player.CameraMode = Enum.CameraMode.Classic
+    player.CameraMinZoomDistance = 5
+    player.CameraMaxZoomDistance = 20
+
+    UserInputService.MouseIconEnabled = true
+
+    button.Text = "TPP : ON"
+    button.BackgroundColor3 = Color3.fromRGB(55, 100, 55)
+end
+
+local function disableTPP()
+    button.Text = "TPP : OFF"
+    button.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+end
+
+button.MouseButton1Click:Connect(function()
+    enabled = not enabled
+
+    if enabled then
+        enableTPP()
+    else
+        disableTPP()
+    end
+end)
+
+-- TPP Lock
+RunService:BindToRenderStep(
+    "TPPLock",
+    Enum.RenderPriority.Camera.Value + 1,
+    function()
+        if enabled then
+            player.CameraMode = Enum.CameraMode.Classic
+            player.CameraMinZoomDistance = 5
+            player.CameraMaxZoomDistance = 20
+
+            UserInputService.MouseIconEnabled = true
+        end
+    end
+)
+
+-- หลังเกิดใหม่ให้บังคับ TPP อีกครั้ง
+player.CharacterAdded:Connect(function()
+    if enabled then
+        task.wait(0.2)
+        enableTPP()
+    end
+end)
+
+-- ลาก UI
+local dragging = false
+local dragStart
+local startPos
+
+title.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+
+        dragging = true
+        dragStart = input.Position
+        startPos = frame.Position
+    end
+end)
+
+title.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+
+        dragging = false
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if not dragging then
+        return
+    end
+
+    if input.UserInputType == Enum.UserInputType.MouseMovement
+        or input.UserInputType == Enum.UserInputType.Touch then
+
+        local delta = input.Position - dragStart
+
+        frame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
