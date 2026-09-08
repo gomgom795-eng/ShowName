@@ -1,0 +1,168 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local Player = Players.LocalPlayer
+
+--// Script URLs
+local Scripts = {
+    ["Deathby ESP"] = "https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/dayEs",
+    ["Fly"] = "https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/fly",
+    ["Hackmapp"] = "https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/showname",
+    ["ฆ่าตกรลับESP"] = "https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/ลับEs",
+    ["ฆ่าตกรลับ Pick"] = "https://raw.githubusercontent.com/gomgom795-eng/ShowName/refs/heads/main/ลับpic",
+    ["ล่องหน"] = "https://pastefy.app/4g8JRtP2/raw",
+    ["Kilck"] = "https://raw.githubusercontent.com/RovlixTinProject/NeverX/refs/heads/main/mfr.lua"
+}
+
+--// UI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ScriptHub"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = Player:WaitForChild("PlayerGui")
+
+local Main = Instance.new("Frame")
+Main.Size = UDim2.new(0, 220, 0, 310)
+Main.Position = UDim2.new(0.5, -110, 0.5, -155)
+Main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Main.BorderSizePixel = 0
+Main.Parent = ScreenGui
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Title.Text = "Script Hub"
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.TextSize = 16
+Title.Parent = Main
+
+--// ปุ่มปิด UI
+local Close = Instance.new("TextButton")
+Close.Size = UDim2.new(0, 30, 0, 30)
+Close.Position = UDim2.new(1, -32, 0, 2)
+Close.BackgroundTransparency = 1
+Close.Text = "X"
+Close.TextColor3 = Color3.fromRGB(255, 80, 80)
+Close.TextSize = 16
+Close.Parent = Main
+
+Close.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+--// Container
+local Container = Instance.new("ScrollingFrame")
+Container.Size = UDim2.new(1, -10, 1, -45)
+Container.Position = UDim2.new(0, 5, 0, 40)
+Container.BackgroundTransparency = 1
+Container.BorderSizePixel = 0
+Container.ScrollBarThickness = 3
+Container.CanvasSize = UDim2.new(0, 0, 0, 0)
+Container.Parent = Main
+
+local Layout = Instance.new("UIListLayout")
+Layout.Padding = UDim.new(0, 5)
+Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+Layout.Parent = Container
+
+Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    Container.CanvasSize = UDim2.new(
+        0,
+        0,
+        0,
+        Layout.AbsoluteContentSize.Y + 5
+    )
+end)
+
+--// สถานะ
+local States = {}
+
+--// สร้างปุ่ม
+for Name, URL in pairs(Scripts) do
+
+    States[Name] = false
+
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(1, -10, 0, 35)
+    Button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    Button.BorderSizePixel = 0
+    Button.Text = Name .. " : OFF"
+    Button.TextColor3 = Color3.new(1, 1, 1)
+    Button.TextSize = 14
+    Button.Parent = Container
+
+    Button.MouseButton1Click:Connect(function()
+
+        if not States[Name] then
+
+            local Success, Error = pcall(function()
+                loadstring(game:HttpGet(URL))()
+            end)
+
+            if Success then
+                States[Name] = true
+                Button.Text = Name .. " : ON"
+                Button.BackgroundColor3 = Color3.fromRGB(45, 100, 45)
+            else
+                warn("โหลด " .. Name .. " ไม่สำเร็จ:", Error)
+                Button.Text = Name .. " : ERROR"
+
+                task.delay(2, function()
+                    if Button then
+                        Button.Text = Name .. " : OFF"
+                    end
+                end)
+            end
+
+        else
+
+            -- หมายเหตุ:
+            -- การกด OFF ตรงนี้จะเปลี่ยนสถานะ UI เท่านั้น
+            -- Script ที่ถูก load ไปแล้วจะไม่ถูกหยุดโดยอัตโนมัติ
+            States[Name] = false
+            Button.Text = Name .. " : OFF"
+            Button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+
+        end
+    end)
+end
+
+--// ลาก UI
+local Dragging = false
+local DragStart
+local StartPosition
+
+Title.InputBegan:Connect(function(Input)
+    if Input.UserInputType == Enum.UserInputType.MouseButton1
+        or Input.UserInputType == Enum.UserInputType.Touch then
+
+        Dragging = true
+        DragStart = Input.Position
+        StartPosition = Main.Position
+
+        Input.Changed:Connect(function()
+            if Input.UserInputState == Enum.UserInputState.End then
+                Dragging = false
+            end
+        end)
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(Input)
+
+    if not Dragging then
+        return
+    end
+
+    if Input.UserInputType == Enum.UserInputType.MouseMovement
+        or Input.UserInputType == Enum.UserInputType.Touch then
+
+        local Delta = Input.Position - DragStart
+
+        Main.Position = UDim2.new(
+            StartPosition.X.Scale,
+            StartPosition.X.Offset + Delta.X,
+            StartPosition.Y.Scale,
+            StartPosition.Y.Offset + Delta.Y
+        )
+    end
+end)
