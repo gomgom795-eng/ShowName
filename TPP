@@ -37,6 +37,34 @@ button.Parent = frame
 
 local enabled = false
 
+local originalTransparency = {}
+
+local function setInvisible(character)
+    for _, obj in ipairs(character:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            if originalTransparency[obj] == nil then
+                originalTransparency[obj] = obj.Transparency
+            end
+            obj.Transparency = 1
+        elseif obj:IsA("Decal") or obj:IsA("Texture") then
+            if originalTransparency[obj] == nil then
+                originalTransparency[obj] = obj.Transparency
+            end
+            obj.Transparency = 1
+        end
+    end
+end
+
+local function setVisible(character)
+    for obj, transparency in pairs(originalTransparency) do
+        if obj and obj.Parent then
+            obj.Transparency = transparency
+        end
+    end
+
+    originalTransparency = {}
+end
+
 local function enableTPP()
     player.CameraMode = Enum.CameraMode.Classic
     player.CameraMinZoomDistance = 5
@@ -44,11 +72,19 @@ local function enableTPP()
 
     UserInputService.MouseIconEnabled = true
 
+    if player.Character then
+        setInvisible(player.Character)
+    end
+
     button.Text = "TPP : ON"
     button.BackgroundColor3 = Color3.fromRGB(55, 100, 55)
 end
 
 local function disableTPP()
+    if player.Character then
+        setVisible(player.Character)
+    end
+
     button.Text = "TPP : OFF"
     button.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
 end
