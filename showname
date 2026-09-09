@@ -51,7 +51,7 @@ local function esp(p,c)
 
 	local h=Instance.new("Highlight")
 	h.Adornee=c
-	h.FillTransparency=.7
+	h.FillTransparency=1
 	h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
 
 	local col=p==Locked and YELLOW or GREEN
