@@ -89,9 +89,9 @@ button.MouseButton1Click:Connect(function()
     toggleTPP()
 end)
 
--- กด F3
+-- กด F1
 UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.F3 then
+    if input.KeyCode == Enum.KeyCode.F1 then
         toggleTPP()
     end
 end)
