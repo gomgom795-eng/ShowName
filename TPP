@@ -74,15 +74,25 @@ local function disableTPP()
     button.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
 end
 
+local function toggleTPP()
+    enabled = not enabled
+
+    if enabled then
+        enableTPP()
+    else
+        disableTPP()
+    end
+end
+
+-- กด UI
+button.MouseButton1Click:Connect(function()
+    toggleTPP()
+end)
+
+-- กด F3
 UserInputService.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.F3 then
-        enabled = not enabled
-
-        if enabled then
-            enableTPP()
-        else
-            disableTPP()
-        end
+        toggleTPP()
     end
 end)
 
