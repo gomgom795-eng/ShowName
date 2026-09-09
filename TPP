@@ -38,77 +38,85 @@ button.Parent = frame
 local enabled = false
 
 local function setCameraOffset()
-    local character = player.Character
-    if not character then return end
+	local character = player.Character
+	if not character then return end
 
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        -- X = ซ้าย/ขวา, Y = ขึ้น/ลง, Z = หน้า/หลัง
-        humanoid.CameraOffset = Vector3.new(2, 0.5, 0)
-    end
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		-- X = ซ้าย/ขวา, Y = ขึ้น/ลง, Z = หน้า/หลัง
+		humanoid.CameraOffset = Vector3.new(2, 1, 0)
+	end
 end
 
 local function enableTPP()
-    player.CameraMode = Enum.CameraMode.Classic
-    player.CameraMinZoomDistance = 5
-    player.CameraMaxZoomDistance = 20
+	player.CameraMode = Enum.CameraMode.Classic
+	player.CameraMinZoomDistance = 5
+	player.CameraMaxZoomDistance = 20
 
-    UserInputService.MouseIconEnabled = true
+	UserInputService.MouseIconEnabled = true
 
-    setCameraOffset()
+	setCameraOffset()
 
-    button.Text = "TPP : ON"
-    button.BackgroundColor3 = Color3.fromRGB(55, 100, 55)
+	button.Text = "TPP : ON"
+	button.BackgroundColor3 = Color3.fromRGB(55, 100, 55)
 end
 
 local function disableTPP()
-    local character = player.Character
-    if character then
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.CameraOffset = Vector3.zero
-        end
-    end
+	local character = player.Character
+	if character then
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid.CameraOffset = Vector3.zero
+		end
+	end
 
-    button.Text = "TPP : OFF"
-    button.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+	button.Text = "TPP : OFF"
+	button.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
 end
 
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
+local function toggleTPP()
+	enabled = not enabled
 
-    if input.KeyCode == Enum.KeyCode.F1 then
-        enabled = not enabled
+	if enabled then
+		enableTPP()
+	else
+		disableTPP()
+	end
+end
 
-        if enabled then
-            enableTPP()
-        else
-            disableTPP()
-        end
-    end
+-- กด UI
+button.MouseButton1Click:Connect(function()
+	toggleTPP()
+end)
+
+-- กด F1
+UserInputService.InputBegan:Connect(function(input)
+	if input.KeyCode == Enum.KeyCode.F1 then
+		toggleTPP()
+	end
 end)
 
 -- TPP Lock
 RunService:BindToRenderStep(
-    "TPPLock",
-    Enum.RenderPriority.Camera.Value + 1,
-    function()
-        if enabled then
-            player.CameraMode = Enum.CameraMode.Classic
-            player.CameraMinZoomDistance = 5
-            player.CameraMaxZoomDistance = 20
+	"TPPLock",
+	Enum.RenderPriority.Camera.Value + 1,
+	function()
+		if enabled then
+			player.CameraMode = Enum.CameraMode.Classic
+			player.CameraMinZoomDistance = 5
+			player.CameraMaxZoomDistance = 20
 
-            UserInputService.MouseIconEnabled = true
-        end
-    end
+			UserInputService.MouseIconEnabled = true
+		end
+	end
 )
 
 -- หลังเกิดใหม่ให้บังคับ TPP อีกครั้ง
 player.CharacterAdded:Connect(function()
-    if enabled then
-        task.wait(0.2)
-        enableTPP()
-    end
+	if enabled then
+		task.wait(0.2)
+		enableTPP()
+	end
 end)
 
 -- ลาก UI
@@ -117,38 +125,38 @@ local dragStart
 local startPos
 
 title.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-        or input.UserInputType == Enum.UserInputType.Touch then
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
 
-        dragging = true
-        dragStart = input.Position
-        startPos = frame.Position
-    end
+		dragging = true
+		dragStart = input.Position
+		startPos = frame.Position
+	end
 end)
 
 title.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-        or input.UserInputType == Enum.UserInputType.Touch then
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
 
-        dragging = false
-    end
+		dragging = false
+	end
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-    if not dragging then
-        return
-    end
+	if not dragging then
+		return
+	end
 
-    if input.UserInputType == Enum.UserInputType.MouseMovement
-        or input.UserInputType == Enum.UserInputType.Touch then
+	if input.UserInputType == Enum.UserInputType.MouseMovement
+		or input.UserInputType == Enum.UserInputType.Touch then
 
-        local delta = input.Position - dragStart
+		local delta = input.Position - dragStart
 
-        frame.Position = UDim2.new(
-            startPos.X.Scale,
-            startPos.X.Offset + delta.X,
-            startPos.Y.Scale,
-            startPos.Y.Offset + delta.Y
-        )
-    end
+		frame.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
 end)
